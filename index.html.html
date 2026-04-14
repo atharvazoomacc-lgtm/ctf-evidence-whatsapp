@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPCCU | WhatsApp Chat Export - EV-001</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #075E54;
+            margin: 0;
+            padding: 20px;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #E5DDD5;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .chat-header {
+            background: #075E54;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .contact-info h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+        .contact-info p {
+            margin: 0;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        .chat-messages {
+            padding: 20px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path d="M10,10 L90,10 M10,30 L90,30 M10,50 L90,50 M10,70 L90,70 M10,90 L90,90" stroke="black" stroke-width="1"/></svg>');
+            min-height: 500px;
+        }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message.in {
+            align-items: flex-start;
+        }
+        .message.out {
+            align-items: flex-end;
+        }
+        .bubble {
+            max-width: 70%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            position: relative;
+            word-wrap: break-word;
+        }
+        .in .bubble {
+            background: white;
+            border-top-left-radius: 4px;
+        }
+        .out .bubble {
+            background: #DCF8C6;
+            border-top-right-radius: 4px;
+        }
+        .sender {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 3px;
+            margin-left: 8px;
+        }
+        .time {
+            font-size: 9px;
+            color: #999;
+            margin-top: 3px;
+            margin-left: 8px;
+        }
+        .message-text {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .referral-code {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 5px 0;
+            border-left: 3px solid #25D366;
+        }
+        .download-section {
+            background: white;
+            padding: 15px 20px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-download {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-download:hover {
+            background: #128C7E;
+        }
+        .forensic-note {
+            background: #FFF3E0;
+            border-left: 4px solid #FF9800;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 12px;
+            font-family: monospace;
+        }
+        @media print {
+            .download-section, .forensic-note {
+                display: none;
+            }
+            body {
+                background: white;
+                padding: 0;
+            }
+            .chat-container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="avatar">P</div>
+            <div class="contact-info">
+                <h3>Priya Sharma</h3>
+                <p>+91 80762 14398 · Last seen today at 2:31 AM</p>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will be populated by JavaScript -->
+        </div>
+        
+        <div class="download-section">
+            <div>
+                <strong>📄 WhatsApp Chat Export</strong><br>
+                <small>Exported on: 21 March 2025 · 47 messages</small>
+            </div>
+            <button class="btn-download" onclick="downloadPDF()">
+                📥 Download PDF Export
+            </button>
+        </div>
+        
+        <div class="forensic-note">
+            🔍 FORENSIC NOTE: This chat export was extracted from victim's WhatsApp backup (.crypt15).<br>
+            ⚠ The referral code in the message from 05-Mar-2025 is Base64 encoded. Decode it to reveal critical intelligence.
+        </div>
+    </div>
+
+    <script>
+        const messages = [
+            { type: 'in', sender: 'Priya Sharma', time: '02 Mar 2025 · 3:17 PM', text: 'Hi! I saw you in the Mumbai Elite Traders group. I\'m Priya, financial analyst at BKC. Nice to connect 😊' },
+            { type: 'out', sender: 'Ramesh Kulkarni', time: '02 Mar 2025 · 3:45 PM', text: 'Hi Priya! Yes I joined recently. The tips from Dr. Kapoor look interesting' },
+            { type: 'in', sender: 'Priya Sharma', time: '02 Mar 2025 · 3:52 PM', text: 'Yes he\'s amazing! I\'ve made ₹2.3L this month alone using his exclusive platform. It\'s invite-only so not everyone knows 🙂' },
+            { type: 'in', sender: 'Priya Sharma', time: '02 Mar 2025 · 3:53 PM', text: 'Are you into stock markets? What do you do?' },
+            { type: 'out', sender: 'Ramesh Kulkarni', time: '02 Mar 2025 · 4:10 PM', text: 'I\'m a CA. I have savings I want to put to work but always been cautious about trading' },
+            { type: 'in', sender: 'Priya Sharma', time: '02 Mar 2025 · 4:18 PM', text: 'Arey perfect! CAs are great investors, you understand numbers! I was the same — cautious until my colleague showed me TradePro India. Genuinely changed my life 🙏' },
+            { type: 'in', sender: 'Priya Sharma', time: '05 Mar 2025 · 10:02 AM', text: 'Let me share my portfolio screenshot so you can see what\'s possible' },
+            { type: 'in', sender: 'Priya Sharma', time: '05 Mar 2025 · 10:04 AM', text: '📷 [Screenshot: Portfolio showing ₹4,82,400 profit — 15 Mar snapshot]' },
+            { type: 'in', sender: 'Priya Sharma', time: '05 Mar 2025 · 10:08 AM', text: "Here's the download link for TradePro app. It's not on Play Store (they keep getting copied so they do direct APK). Use my referral code so you get ₹500 bonus:\n\nhttp://103.27.8.142/downloads/tradepro_v2.1.apk\n\nReferral: Q0FNQk9ESUEtT1BT" },
+            { type: 'out', sender: 'Ramesh Kulkarni', time: '05 Mar 2025 · 11:33 AM', text: 'Downloaded! Registering now. Thanks Priya 😊' },
+            { type: 'in', sender: 'Priya Sharma', time: '05 Mar 2025 · 11:40 AM', text: 'Great! Vikram from their support will call you to verify your account. He\'s very helpful' },
+            { type: 'in', sender: 'Priya Sharma', time: '10 Mar 2025 · 9:00 AM', text: 'How much are you planning to start with? I started with ₹20,000 and grew it 10x in 3 months 😍' },
+            { type: 'out', sender: 'Ramesh Kulkarni', time: '10 Mar 2025 · 9:05 AM', text: 'Maybe 75,000? Let me try and see' },
+            { type: 'in', sender: 'Priya Sharma', time: '10 Mar 2025 · 9:09 AM', text: "That's perfect! IPO window opens tomorrow — best time to invest. I'm putting ₹5L more myself!" },
+            { type: 'in', sender: 'Priya Sharma', time: '13 Mar 2025 · 8:30 AM', text: 'Rameshji your portfolio is showing ₹1,42,000 already! 89% profit in 3 days 🔥🔥' },
+            { type: 'out', sender: 'Ramesh Kulkarni', time: '13 Mar 2025 · 8:45 AM', text: 'Wow that\'s incredible! Should I put more in?' },
+            { type: 'in', sender: 'Priya Sharma', time: '13 Mar 2025 · 9:01 AM', text: 'YES! Special IPO closes TODAY at 4PM. Minimum ₹3L to get the best allocation. I\'m putting ₹10L 😊' },
+            { type: 'in', sender: 'Priya Sharma', time: '15 Mar 2025 · 3:50 PM', text: "Rameshji don't worry about the GST error. It happened to me too. You just need to pay the 18% GST (SEBI rule) and the withdrawal processes immediately. I paid and got my money same day" },
+            { type: 'out', sender: 'Ramesh Kulkarni', time: '15 Mar 2025 · 4:15 PM', text: "OK I'll pay. But this is the last time — I need my money" },
+            { type: 'in', sender: 'Priya Sharma', time: '17 Mar 2025 · 1:55 PM', text: 'Of course! After the RBI audit clears it will all come. The audit fee is just a formality, refunded in 4 hours' }
+        ];
+
+        function renderMessages() {
+            const container = document.getElementById('chatMessages');
+            container.innerHTML = '';
+            
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.type}`;
+                
+                let messageHtml = `<div class="sender">${msg.sender}</div>`;
+                
+                // Check if this is the message with the referral code
+                if (msg.text.includes('Q0FNQk9ESUEtT1BT')) {
+                    const parts = msg.text.split('\n\n');
+                    messageHtml += `<div class="bubble">
+                        <div class="message-text">${parts[0]}</div>
+                        <div class="referral-code">
+                            🔑 <strong>REFERRAL CODE FOUND:</strong><br>
+                            <code style="font-size:16px;font-weight:bold;">Q0FNQk9ESUEtT1BT</code>
+                            <div style="font-size:10px;color:#666;margin-top:5px;">
+                                ⚠ This appears to be Base64 encoded. Decode for Challenge 2!
+                            </div>
+                        </div>
+                        <div class="message-text">${parts[1] || ''}</div>
+                        <div class="time">${msg.time}</div>
+                    </div>`;
+                } else {
+                    messageHtml += `<div class="bubble">
+                        <div class="message-text">${msg.text.replace(/\n/g, '<br>')}</div>
+                        <div class="time">${msg.time}</div>
+                    </div>`;
+                }
+                
+                messageDiv.innerHTML = messageHtml;
+                container.appendChild(messageDiv);
+            });
+        }
+
+        function downloadPDF() {
+            // Create a styled PDF-friendly version
+            const pdfContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>WhatsApp Chat Export - Priya Sharma</title>
+                <style>
+                    body {
+                        font-family: 'Helvetica', 'Arial', sans-serif;
+                        margin: 40px;
+                        line-height: 1.6;
+                    }
+                    .header {
+                        text-align: center;
+                        margin-bottom: 30px;
+                        padding-bottom: 20px;
+                        border-bottom: 2px solid #075E54;
+                    }
+                    .contact-card {
+                        background: #f5f5f5;
+                        padding: 15px;
+                        border-radius: 8px;
+                        margin-bottom: 20px;
+                    }
+                    .message {
+                        margin-bottom: 15px;
+                        page-break-inside: avoid;
+                    }
+                    .in-message {
+                        margin-left: 20px;
+                        border-left: 3px solid #075E54;
+                        padding-left: 15px;
+                    }
+                    .out-message {
+                        margin-left: 40px;
+                        border-left: 3px solid #25D366;
+                        padding-left: 15px;
+                    }
+                    .sender {
+                        font-weight: bold;
+                        font-size: 12px;
+                        color: #666;
+                    }
+                    .time {
+                        font-size: 10px;
+                        color: #999;
+                        margin-top: 5px;
+                    }
+                    .message-text {
+                        font-size: 12px;
+                        margin-top: 5px;
+                    }
+                    .referral-box {
+                        background: #FFF3E0;
+                        border: 1px solid #FF9800;
+                        padding: 10px;
+                        margin: 10px 0;
+                        border-radius: 5px;
+                        font-family: monospace;
+                    }
+                    .footer {
+                        margin-top: 40px;
+                        padding-top: 20px;
+                        border-top: 1px solid #ddd;
+                        text-align: center;
+                        font-size: 10px;
+                        color: #999;
+                    }
+                    .forensic-header {
+                        background: #e8f5e9;
+                        padding: 10px;
+                        border-radius: 5px;
+                        margin-bottom: 20px;
+                        font-size: 11px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>WhatsApp Chat Export</h1>
+                    <p>Case: CR/CY/0412/2025 | Operation StockMirage</p>
+                    <p>Exported: 21 March 2025 | Source: Victim's device backup</p>
+                </div>
+                
+                <div class="contact-card">
+                    <strong>Contact:</strong> Priya Sharma (+91 80762 14398)<br>
+                    <strong>Type:</strong> Suspect / Fraudster<br>
+                    <strong>Chat Period:</strong> 02 March 2025 - 19 March 2025<br>
+                    <strong>Total Messages:</strong> 47
+                </div>
+                
+                <div class="forensic-header">
+                    🔍 FORENSIC ANALYSIS NOTE:<br>
+                    The referral code "Q0FNQk9ESUEtT1BT" found in the 05-Mar-2025 message is Base64 encoded.
+                    Decoding this string reveals critical intelligence about the operation's location.
+                </div>
+                
+                <div class="messages">
+            `;
+            
+            messages.forEach((msg, idx) => {
+                pdfContent += `
+                    <div class="message">
+                        <div class="${msg.type === 'in' ? 'in-message' : 'out-message'}">
+                            <div class="sender">${msg.sender}</div>
+                            <div class="message-text">${msg.text.replace(/\n/g, '<br>')}</div>
+                            <div class="time">${msg.time}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            pdfContent += `
+                </div>
+                
+                <div class="footer">
+                    <p>MPCCU | Cyber Crime Cell, Mumbai | Evidence Exhibit EV-001</p>
+                    <p>This document is a true and accurate representation of the digital evidence extracted.</p>
+                    <p>⚠ FOR OFFICIAL TRAINING USE ONLY ⚠</p>
+                </div>
+            </body>
+            </html>
+            `;
+            
+            // Create blob and download
+            const blob = new Blob([pdfContent], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'EV-001_WhatsApp_Chat_Export_Priya_Sharma.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Also provide a direct text export option
+        function downloadTXT() {
+            let content = `MPCCU EVIDENCE EXHIBIT EV-001
+=====================================
+Case: CR/CY/0412/2025 - Operation StockMirage
+Contact: Priya Sharma (+91 80762 14398)
+Export Date: 21 March 2025
+Total Messages: 47
+
+--- FULL CHAT TRANSCRIPT ---
+
+`;
+            messages.forEach(msg => {
+                content += `[${msg.time}] ${msg.sender}: ${msg.text}\n\n`;
+            });
+            
+            content += `
+=====================================
+FORENSIC NOTE:
+The referral code "Q0FNQk9ESUEtT1BT" (found in message from 05-Mar-2025) is Base64 encoded.
+Decode it using: echo "Q0FNQk9ESUEtT1BT" | base64 -d
+Expected output: CAMBODIA-OPS
+=====================================
+`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'EV-001_WhatsApp_Chat_Export.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Add TXT download button next to PDF
+        const downloadSection = document.querySelector('.download-section');
+        const txtBtn = document.createElement('button');
+        txtBtn.className = 'btn-download';
+        txtBtn.style.background = '#128C7E';
+        txtBtn.innerHTML = '📄 Download TXT Export';
+        txtBtn.onclick = downloadTXT;
+        downloadSection.appendChild(txtBtn);
+        
+        renderMessages();
+    </script>
+</body>
+</html>
