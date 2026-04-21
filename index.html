@@ -1,1 +1,400 @@
-404: Not Found
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MPCCU | Operation StockMirage — CTF</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#080b12;color:#cbd5e1;font-family:'Rajdhani',sans-serif;font-size:15px;}
+  :root{--bg:#080b12;--bg2:#0d1220;--panel:#131c2e;--border:#1e2d47;--amber:#f59e0b;--amber2:#fbbf24;--red:#ef4444;--green:#22c55e;--blue:#3b82f6;--cyan:#06b6d4;--muted:#64748b;--text:#cbd5e1;--white:#f1f5f9;--mono:'Share Tech Mono',monospace;--ui:'Rajdhani',sans-serif;--head:'Orbitron',sans-serif;}
+  body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:9999;}
+  .lang-bar{background:#0a1020;border-bottom:1px solid var(--border);padding:6px 24px;display:flex;justify-content:flex-end;gap:12px;position:sticky;top:0;z-index:200;}
+  .lang-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:20px;cursor:pointer;font-family:var(--mono);font-size:11px;}
+  .lang-btn.active{background:rgba(245,158,11,0.2);border-color:var(--amber);color:var(--amber);}
+  .topbar{background:linear-gradient(90deg,#06122a,#0d1f3c,#08162e);border-bottom:2px solid var(--amber);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:16px;}
+  .emblem{width:52px;height:52px;background:radial-gradient(circle,#1a3a6e,#061020);border:2px solid var(--amber);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}
+  .topbar-title h1{font-family:var(--head);font-size:13px;color:var(--amber);letter-spacing:2px;}
+  .topbar-title p{font-family:var(--mono);font-size:11px;color:var(--muted);}
+  .case-badge{font-family:var(--head);font-size:11px;color:var(--amber2);background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);padding:4px 12px;border-radius:2px;}
+  .live-dot{display:inline-block;width:8px;height:8px;background:var(--red);border-radius:50%;animation:blink 1.2s infinite;margin-right:6px;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+  .alert-banner{background:rgba(239,68,68,0.12);border-bottom:1px solid rgba(239,68,68,0.3);font-family:var(--mono);font-size:11px;color:#fca5a5;padding:6px 24px;overflow:hidden;white-space:nowrap;}
+  .alert-banner span{display:inline-block;animation:ticker 28s linear infinite;}
+  @keyframes ticker{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+  .main{display:flex;min-height:calc(100vh - 78px);}
+  .sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;}
+  .sidebar-section{margin-bottom:24px;}
+  .sidebar-label{font-family:var(--mono);font-size:10px;color:var(--muted);padding:0 16px 8px;border-bottom:1px solid var(--border);margin-bottom:8px;text-transform:uppercase;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:var(--muted);border-left:3px solid transparent;transition:all 0.2s;}
+  .nav-item:hover{background:rgba(245,158,11,0.05);color:var(--text);}
+  .nav-item.active{color:var(--amber);border-left-color:var(--amber);background:rgba(245,158,11,0.08);}
+  .nav-item .icon{font-size:16px;width:20px;}
+  .status-chip{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;margin-left:auto;}
+  .chip-red{background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);}
+  .chip-green{background:rgba(34,197,94,0.15);color:#86efac;border:1px solid rgba(34,197,94,0.3);}
+  .chip-amber{background:rgba(245,158,11,0.15);color:var(--amber2);border:1px solid rgba(245,158,11,0.3);}
+  .case-stats{padding:0 16px;}
+  .stat-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);}
+  .stat-row:last-child{border-bottom:none;}
+  .stat-label{font-size:11px;color:var(--muted);font-family:var(--mono);}
+  .stat-val{font-size:12px;color:var(--text);font-weight:700;font-family:var(--mono);}
+  .stat-val.danger{color:var(--red);}.stat-val.warn{color:var(--amber);}.stat-val.ok{color:var(--green);}
+  .content{flex:1;padding:28px;overflow-y:auto;}
+  .tab-pane{display:none;}.tab-pane.active{display:block;animation:fadein 0.3s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .section-header{display:flex;align-items:baseline;gap:14px;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+  .section-header h2{font-family:var(--head);font-size:18px;color:var(--white);letter-spacing:2px;text-transform:uppercase;}
+  .section-header .sub{font-family:var(--mono);font-size:11px;color:var(--muted);}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:20px;margin-bottom:16px;}
+  .card-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .card-title{font-weight:700;font-size:14px;color:var(--white);text-transform:uppercase;flex:1;}
+  .card-icon{font-size:18px;}
+  .incident-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+  @media(max-width:800px){.incident-grid{grid-template-columns:1fr;}}
+  .info-block{margin-bottom:10px;}
+  .info-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+  .info-val{font-size:15px;color:var(--white);font-weight:600;}
+  .info-val.money{color:var(--red);font-size:20px;font-family:var(--mono);}
+  .story-text{font-size:14px;line-height:1.8;color:var(--text);}
+  .highlight{background:rgba(245,158,11,0.1);border-left:3px solid var(--amber);padding:10px 14px;margin:12px 0;border-radius:0 4px 4px 0;}
+  .timeline{position:relative;padding-left:30px;}
+  .timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--amber),var(--border) 80%);}
+  .tl-item{position:relative;margin-bottom:20px;opacity:0;animation:tl-appear 0.4s ease forwards;}
+  .tl-item:nth-child(1){animation-delay:0.1s}
+  .tl-item:nth-child(2){animation-delay:0.2s}
+  .tl-item:nth-child(3){animation-delay:0.3s}
+  .tl-item:nth-child(4){animation-delay:0.4s}
+  .tl-item:nth-child(5){animation-delay:0.5s}
+  .tl-item:nth-child(6){animation-delay:0.6s}
+  .tl-item:nth-child(7){animation-delay:0.7s}
+  .tl-item:nth-child(8){animation-delay:0.8s}
+  @keyframes tl-appear{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+  .tl-dot{position:absolute;left:-24px;top:12px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--amber);}
+  .tl-dot.critical{border-color:var(--red);}
+  .tl-dot.safe{border-color:var(--green);}
+  .tl-card{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:14px 16px;}
+  .tl-card.critical-event{border-left:3px solid var(--red);}
+  .tl-card.warning-event{border-left:3px solid var(--amber);}
+  .tl-date{font-family:var(--mono);font-size:10px;color:var(--amber);margin-bottom:4px;}
+  .tl-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px;}
+  .tl-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+  .tl-amount{font-family:var(--mono);font-size:13px;color:var(--red);margin-top:4px;font-weight:700;}
+  .evidence-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:20px;}
+  .evidence-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:all 0.2s;}
+  .evidence-card:hover{border-color:var(--cyan);transform:translateY(-3px);}
+  .evidence-card-top{padding:16px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.2);}
+  .ev-icon{width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;}
+  .ev-icon.green{background:rgba(34,197,94,0.15);}
+  .ev-icon.blue{background:rgba(59,130,246,0.15);}
+  .ev-icon.red{background:rgba(239,68,68,0.15);}
+  .ev-icon.amber{background:rgba(245,158,11,0.15);}
+  .ev-icon.cyan{background:rgba(6,182,212,0.15);}
+  .ev-title{font-size:15px;font-weight:700;color:white;}
+  .ev-sub{font-family:var(--mono);font-size:9px;color:var(--muted);}
+  .ev-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:12px;}
+  .evidence-body{padding:14px 16px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.5;}
+  .download-btn{display:inline-block;background:rgba(6,182,212,0.1);border:1px solid var(--cyan);color:var(--cyan);padding:6px 12px;border-radius:4px;font-size:10px;margin-top:10px;margin-right:8px;cursor:pointer;text-decoration:none;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:1000;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:#0d1220;border:1px solid var(--border);border-top:3px solid var(--cyan);border-radius:12px;width:90%;max-width:800px;max-height:85vh;overflow-y:auto;}
+  .modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .modal-close{cursor:pointer;font-size:24px;color:var(--muted);}
+  .modal-body{padding:20px;}
+  .whois-block{background:#0a0f1a;padding:16px;border-radius:8px;font-family:var(--mono);font-size:12px;line-height:1.8;}
+  .tx-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;}
+  .tx-table th,.tx-table td{padding:10px;border:1px solid var(--border);text-align:left;}
+  .tx-debit{color:var(--red);font-weight:bold;}
+  .score-overview{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+  .score-card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:20px;text-align:center;}
+  .score-card .big-num{font-family:var(--head);font-size:36px;font-weight:900;display:block;}
+  .progress-bar-wrap{background:var(--bg);border-radius:4px;height:8px;overflow:hidden;margin-top:8px;}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--amber2));border-radius:4px;transition:width 0.5s ease;}
+  .challenge-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden;}
+  .challenge-card.solved{border-color:var(--green);}
+  .ch-header{padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;border-bottom:1px solid var(--border);}
+  .ch-num{width:40px;height:40px;border:2px solid;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:bold;}
+  .diff-easy{border-color:var(--green);color:var(--green);}
+  .diff-medium{border-color:var(--amber);color:var(--amber);}
+  .diff-hard{border-color:var(--red);color:var(--red);}
+  .ch-title{font-size:16px;font-weight:bold;color:white;}
+  .ch-meta{font-size:11px;color:var(--muted);}
+  .ch-points{font-size:18px;font-weight:bold;color:var(--amber);margin-left:auto;}
+  .ch-status{font-size:20px;}
+  .ch-body{padding:20px;display:none;}
+  .ch-body.open{display:block;}
+  .challenge-desc{background:rgba(0,0,0,0.2);padding:12px 16px;border-radius:8px;border-left:3px solid var(--blue);margin-bottom:16px;font-size:13px;}
+  .flag-input-area{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .flag-input{flex:1;background:#0a0f1a;border:1px solid var(--border);padding:10px 14px;font-family:var(--mono);color:white;border-radius:6px;}
+  .submit-btn{background:rgba(245,158,11,0.15);border:1px solid var(--amber);color:var(--amber);padding:10px 20px;border-radius:6px;cursor:pointer;}
+  .flag-result{margin-top:10px;font-size:12px;display:none;}
+  .flag-result.show{display:block;}
+  .flag-result.success{color:var(--green);}
+  .flag-result.fail{color:var(--red);}
+  .answer-key{background:var(--panel);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-top:16px;}
+  .ak-header{background:rgba(239,68,68,0.1);border-bottom:1px solid rgba(239,68,68,0.3);padding:12px 16px;display:flex;justify-content:space-between;}
+  .ak-title{font-family:var(--head);font-size:12px;color:var(--red);letter-spacing:2px;}
+  .lock-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 14px;font-family:var(--mono);font-size:11px;border-radius:4px;cursor:pointer;}
+  .ak-body{padding:16px;display:none;}
+  .ak-body.open{display:block;}
+  .ak-row{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .ak-row:last-child{border-bottom:none;}
+  .ak-ch-num{font-family:var(--head);font-size:12px;color:var(--amber);width:28px;}
+  .ak-flag{font-family:var(--mono);font-size:12px;color:var(--green);}
+  .content-footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--border);text-align:center;font-size:10px;color:var(--muted);}
+  @media(max-width:700px){.sidebar{display:none;}.evidence-grid{grid-template-columns:1fr;}.score-overview{grid-template-columns:1fr;}.incident-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="lang-bar">
+  <button class="lang-btn active" data-lang="en">🇬🇧 ENGLISH</button>
+  <button class="lang-btn" data-lang="hi">🇮🇳 हिंदी</button>
+  <button class="lang-btn" data-lang="mr">🇮🇳 मराठी</button>
+</div>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="emblem">🛡️</div>
+    <div class="topbar-title">
+      <h1>Mumbai Police — Cyber Crime Cell</h1>
+      <p>REAL FORENSICS CTF // NO HINTS // USE YOUR SKILLS</p>
+    </div>
+  </div>
+  <div class="case-badge"><span class="live-dot"></span>CASE: CR/CY/0412/2025 // OPERATION STOCKMIRAGE</div>
+</div>
+
+<div class="alert-banner">
+  <span>⚠ REAL CTF CHALLENGE — NO STEP-BY-STEP INSTRUCTIONS — YOU MUST FIGURE OUT THE TOOLS AND COMMANDS YOURSELF ⚠</span>
+</div>
+
+<div class="main">
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <div class="nav-item active" onclick="showTab('brief',this)"><span class="icon">📋</span> Case Brief</div>
+      <div class="nav-item" onclick="showTab('evidence',this)"><span class="icon">🔍</span> Evidence Locker</div>
+      <div class="nav-item" onclick="showTab('challenges',this)"><span class="icon">🚩</span> CTF Challenges <span class="status-chip chip-amber" id="flag-counter">0/6</span></div>
+      <div class="nav-item" onclick="showTab('trainer',this)"><span class="icon">🎓</span> Trainer Guide</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Case Stats</div>
+      <div class="case-stats">
+        <div class="stat-row"><span class="stat-label">Victim</span><span class="stat-val">Ramesh K.</span></div>
+        <div class="stat-row"><span class="stat-label">Loss</span><span class="stat-val danger">₹8,40,000</span></div>
+        <div class="stat-row"><span class="stat-label">Crime Type</span><span class="stat-val warn">Pig Butchering</span></div>
+        <div class="stat-row"><span class="stat-label">Your Score</span><span class="stat-val ok" id="sidebar-score">0 / 600</span></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="content">
+    <!-- ========== CASE BRIEF (FULL) ========== -->
+    <div id="tab-brief" class="tab-pane active">
+      <div class="section-header"><h2>Operation StockMirage</h2><span class="sub">// CASE BRIEF & BACKGROUND</span></div>
+      <div class="incident-grid">
+        <div class="card">
+          <div class="card-header"><span class="card-icon">👤</span><span class="card-title">Victim Profile</span><span class="status-chip chip-red">COMPLAINANT</span></div>
+          <div class="info-block"><div class="info-label">Name</div><div class="info-val">Ramesh Dattatray Kulkarni</div></div>
+          <div class="info-block"><div class="info-label">Age / Occupation</div><div class="info-val">47 Years — Chartered Accountant</div></div>
+          <div class="info-block"><div class="info-label">Address</div><div class="info-val">Andheri West, Mumbai – 400053</div></div>
+          <div class="info-block"><div class="info-label">FIR No.</div><div class="info-val">CR/CY/0412/2025 — Cyber Cell, Andheri</div></div>
+          <div class="info-block"><div class="info-label">Date of Complaint</div><div class="info-val">21 March 2025</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-icon">💸</span><span class="card-title">Financial Loss Summary</span><span class="status-chip chip-red">CRITICAL</span></div>
+          <div class="info-block"><div class="info-label">Total Amount Defrauded</div><div class="info-val money">₹ 8,40,000</div></div>
+          <div class="info-block"><div class="info-label">Period</div><div class="info-val">01 Mar — 20 Mar 2025 (20 days)</div></div>
+          <div class="info-block"><div class="info-label">Payment Mode</div><div class="info-val">UPI (4 transactions)</div></div>
+          <div class="info-block"><div class="info-label">Fake Platform</div><div class="info-val">TradePro India (tradepro-india.net)</div></div>
+          <div class="info-block"><div class="info-label">Suspect Contact</div><div class="info-val">"Priya Sharma" — WA: +91-80762-14398</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📖</span><span class="card-title">How The Crime Happened — Full Narrative</span></div>
+        <div class="story-text">
+          <p><strong>1 March 2025 — The Hook</strong><br>Ramesh receives a WhatsApp group invite from an unknown number. The group is named "Mumbai Elite Traders 🚀 | SEBI Tips" with 248 fake members. A "stock expert" called Dr. Arvind Kapoor posts daily "free tips" with screenshots of huge gains.</p>
+          <div class="highlight">🔑 Social Engineering Tactic: The group creates a false sense of legitimacy using SEBI branding and fake testimonials.</div>
+          <p><strong>2 March 2025 — Trust Building</strong><br>A profile named "Priya Sharma" messages Ramesh privately. She claims to be a financial analyst. Over 3 days she builds rapport — discussing family, work, markets. She shares that she made ₹2.3 lakhs using a "premium trading platform" called TradePro India.</p>
+          <div class="highlight">🔑 Technique — Pig Butchering: Scammers invest time building deep trust before asking for money.</div>
+          <p><strong>5 March 2025 — The Bait (App Download)</strong><br>Priya sends a link to download the TradePro India APK directly (not from Play Store). A fake "Relationship Manager" calls from an Indian VoIP number. The app looks professional with live stock prices and a portfolio dashboard.</p>
+          <p><strong>8 March 2025 — First Small Win</strong><br>Ramesh invests ₹5,000. Within 2 days the app shows a profit of ₹8,400. He withdraws successfully – scammers allow the first withdrawal to build confidence.</p>
+          <div class="highlight">⚠️ Classic Trick: Scammers always allow the first small withdrawal. This "proof of concept" hooks the victim completely.</div>
+          <p><strong>10–13 March 2025 — Escalating Investments</strong><br>Ramesh invests ₹75,000 on March 10. The app shows ₹1,42,000 within 3 days. On March 13, he transfers ₹3,00,000. The app now shows his portfolio at ₹5,28,000.</p>
+          <p><strong>15 March 2025 — The Squeeze Begins (Fake Taxes)</strong><br>When Ramesh tries to withdraw, the app shows an error: "You must pay 18% GST on profits as per SEBI mandate." He transfers ₹2,00,000 to a "GST collection account".</p>
+          <p><strong>17 March 2025 — RBI Audit Scam</strong><br>A fake "RBI representative" calls from a spoofed number and demands a ₹1,65,000 "audit clearance fee". Ramesh pays. Total loss: ₹8,40,000.</p>
+          <p><strong>20 March 2025 — Vanishing Act</strong><br>All WhatsApp contacts go dark. The TradePro India app shows "Server Maintenance." The website goes offline.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">🎯</span><span class="card-title">Your Mission</span></div>
+        <div class="story-text">Six pieces of digital evidence have been collected. Analyze each, find hidden clues, and capture 6 flags in the format <code>MPCCU{...}</code>. Navigate to the Evidence Locker, download the artifacts, and use your forensic skills. No further instructions are given – you must decide which tools and commands to use.</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span>⏱</span><span class="card-title">Crime Timeline</span></div>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot safe"></div><div class="tl-card"><div class="tl-date">📅 01 MAR 2025 — 11:32 AM</div><div class="tl-title">WhatsApp Group Invite Received</div><div class="tl-desc">Victim receives invite link from +91-80762-14398.</div></div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-card"><div class="tl-date">📅 02 MAR 2025 — 03:17 PM</div><div class="tl-title">First Private Contact</div><div class="tl-desc">"Priya Sharma" initiates private chat.</div></div></div>
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-card warning-event"><div class="tl-date">📅 05 MAR 2025 — 10:08 AM</div><div class="tl-title">Malicious APK Link Shared</div><div class="tl-desc">APK download link: http://103.27.8.142/downloads/tradepro_v2.1.apk. Referral code given.</div></div></div>
+          <div class="tl-item"><div class="tl-dot critical"></div><div class="tl-card critical-event"><div class="tl-date">📅 10 MAR 2025 — 09:12 AM</div><div class="tl-title">Transaction 1</div><div class="tl-desc">₹75,000 to varun.trading@paytm</div><div class="tl-amount">- ₹75,000</div></div></div>
+          <div class="tl-item"><div class="tl-dot critical"></div><div class="tl-card critical-event"><div class="tl-date">📅 13 MAR 2025 — 11:34 AM</div><div class="tl-title">Transaction 2 (Largest)</div><div class="tl-desc">₹3,00,000 to profits.india2024@ybl</div><div class="tl-amount">- ₹3,00,000</div></div></div>
+          <div class="tl-item"><div class="tl-dot critical"></div><div class="tl-card critical-event"><div class="tl-date">📅 15 MAR 2025 — 04:20 PM</div><div class="tl-title">Transaction 3</div><div class="tl-desc">₹2,00,000 to gst.collect.india@okaxis (fake GST)</div><div class="tl-amount">- ₹2,00,000</div></div></div>
+          <div class="tl-item"><div class="tl-dot critical"></div><div class="tl-card critical-event"><div class="tl-date">📅 17 MAR 2025 — 02:07 PM</div><div class="tl-title">Transaction 4</div><div class="tl-desc">₹1,65,000 to rbi.clearance88@okhdfc (fake RBI fee)</div><div class="tl-amount">- ₹1,65,000</div></div></div>
+          <div class="tl-item"><div class="tl-dot safe"></div><div class="tl-card"><div class="tl-date">📅 21 MAR 2025 — 10:30 AM</div><div class="tl-title">FIR Filed</div><div class="tl-desc">Victim files complaint. Total loss confirmed: ₹8,40,000.</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== EVIDENCE LOCKER (NO INSTRUCTIONS) ========== -->
+    <div id="tab-evidence" class="tab-pane">
+      <div class="section-header"><h2>Evidence Locker</h2><span class="sub">// DOWNLOAD THE FILES AND ANALYZE</span></div>
+      <p style="margin-bottom:20px;">⚠ These are the actual artifacts seized during the investigation. Download each file and examine it with appropriate forensic tools.</p>
+      <div class="evidence-grid">
+        <div class="evidence-card" onclick="openModal('modal-whois')">
+          <div class="evidence-card-top"><div class="ev-icon blue">🌐</div><div><div class="ev-title">WHOIS Record</div><div class="ev-sub">athkalivara.dpdns.org</div></div><span class="ev-badge chip-red">TEXT</span></div>
+          <div class="evidence-body"><a href="EV-002_whois_athkalivara.txt" download class="download-btn" onclick="event.stopPropagation()">📥 DOWNLOAD WHOIS (TXT)</a><br>The domain registered by the scammers.</div>
+        </div>
+        <div class="evidence-card" onclick="openModal('modal-chat')">
+          <div class="evidence-card-top"><div class="ev-icon green">💬</div><div><div class="ev-title">WhatsApp Chat Log</div><div class="ev-sub">Excerpt with referral code</div></div><span class="ev-badge chip-amber">TEXT</span></div>
+          <div class="evidence-body">Referral code: <code>Q0FNQk9ESUEtT1BT</code><br>Sent by "Priya Sharma" on 5 March 2025.</div>
+        </div>
+        <div class="evidence-card" onclick="openModal('modal-txn')">
+          <div class="evidence-card-top"><div class="ev-icon red">🏦</div><div><div class="ev-title">Bank Statement</div><div class="ev-sub">UPI Transactions</div></div><span class="ev-badge chip-red">CSV</span></div>
+          <div class="evidence-body">Four fraudulent transactions. Largest: ₹3,00,000 to <code>profits.india2024@ybl</code>.</div>
+        </div>
+        <div class="evidence-card" onclick="openModal('modal-apk')">
+          <div class="evidence-card-top"><div class="ev-icon amber">📱</div><div><div class="ev-title">APK File</div><div class="ev-sub">tradepro_v2.1.apk</div></div><span class="ev-badge chip-amber">APK</span></div>
+          <div class="evidence-body"><a href="tradepro_v2.1.apk" download class="download-btn" onclick="event.stopPropagation()">📥 DOWNLOAD APK</a><br>The malicious trading application.</div>
+        </div>
+        <div class="evidence-card" onclick="openModal('modal-exif')">
+          <div class="evidence-card-top"><div class="ev-icon cyan">🖼️</div><div><div class="ev-title">Screenshot with EXIF</div><div class="ev-sub">profit_screenshot.jpg</div></div><span class="ev-badge chip-green">JPEG</span></div>
+          <div class="evidence-body"><a href="portfolio_profit.jpg" download class="download-btn" onclick="event.stopPropagation()">📥 DOWNLOAD IMAGE</a><br>Shared by suspect as "proof of profit".</div>
+        </div>
+        <div class="evidence-card" onclick="openModal('modal-ip')">
+          <div class="evidence-card-top"><div class="ev-icon red">🌍</div><div><div class="ev-title">IP Address</div><div class="ev-sub">103.27.8.142</div></div><span class="ev-badge chip-red">NETWORK</span></div>
+          <div class="evidence-body">Server IP where the APK was hosted.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== CHALLENGES (NO HINTS) ========== -->
+    <div id="tab-challenges" class="tab-pane">
+      <div class="section-header"><h2>CTF Challenges</h2><span class="sub">// SUBMIT FLAGS — FORMAT: MPCCU{...}</span></div>
+      <div class="score-overview">
+        <div class="score-card"><span class="big-num" id="score-num">0</span><span class="label">POINTS</span><div class="progress-bar-wrap"><div class="progress-bar-fill" id="score-bar" style="width:0%"></div></div></div>
+        <div class="score-card"><span class="big-num" id="flags-num">0</span><span class="label">FLAGS</span><div class="progress-bar-wrap"><div class="progress-bar-fill" id="flags-bar" style="width:0%"></div></div></div>
+        <div class="score-card"><span class="big-num" id="remain-num">6</span><span class="label">REMAINING</span></div>
+      </div>
+
+      <div class="challenge-card" id="ch1-card"><div class="ch-header" onclick="toggleChallenge('ch1')"><div class="ch-num diff-easy">1</div><div><div class="ch-title">WHOIS Warrior</div><div class="ch-meta">100 PTS</div></div><div class="ch-points">100 PTS</div><div class="ch-status" id="ch1-status">🔒</div></div>
+      <div class="ch-body" id="ch1-body"><div class="challenge-desc">Download the WHOIS record of <strong>athkalivara.dpdns.org</strong>. Find the exact registration date and submit it as <code>MPCCU{domain_reg_YYYYMMDD}</code>.</div><div class="flag-input-area"><input class="flag-input" id="flag1-input" placeholder="MPCCU{...}"><button class="submit-btn" onclick="checkFlag(1,'MPCCU{domain_reg_20251225}')">SUBMIT</button></div><div class="flag-result" id="result1"></div></div></div>
+
+      <div class="challenge-card" id="ch2-card"><div class="ch-header" onclick="toggleChallenge('ch2')"><div class="ch-num diff-easy">2</div><div><div class="ch-title">Chat Decoder</div><div class="ch-meta">100 PTS</div></div><div class="ch-points">100 PTS</div><div class="ch-status" id="ch2-status">🔒</div></div>
+      <div class="ch-body" id="ch2-body"><div class="challenge-desc">The WhatsApp chat contains a referral code: <code>Q0FNQk9ESUEtT1BT</code>. Decode it. Submit the decoded value (uppercase with hyphens). Format: <code>MPCCU{DECODED}</code>.</div><div class="flag-input-area"><input class="flag-input" id="flag2-input" placeholder="MPCCU{...}"><button class="submit-btn" onclick="checkFlag(2,'MPCCU{CAMBODIA-OPS}')">SUBMIT</button></div><div class="flag-result" id="result2"></div></div></div>
+
+      <div class="challenge-card" id="ch3-card"><div class="ch-header" onclick="toggleChallenge('ch3')"><div class="ch-num diff-medium">3</div><div><div class="ch-title">Money Mule Trail</div><div class="ch-meta">150 PTS</div></div><div class="ch-points">150 PTS</div><div class="ch-status" id="ch3-status">🔒</div></div>
+      <div class="ch-body" id="ch3-body"><div class="challenge-desc">The largest fraudulent transfer went to <code>profits.india2024@ybl</code>. Determine the IFSC code of the receiving bank. Format: <code>MPCCU{IFSC_CODE}</code>.</div><div class="flag-input-area"><input class="flag-input" id="flag3-input" placeholder="MPCCU{...}"><button class="submit-btn" onclick="checkFlag(3,'MPCCU{YESB0000001}')">SUBMIT</button></div><div class="flag-result" id="result3"></div></div></div>
+
+      <div class="challenge-card" id="ch4-card"><div class="ch-header" onclick="toggleChallenge('ch4')"><div class="ch-num diff-medium">4</div><div><div class="ch-title">App Trap</div><div class="ch-meta">150 PTS</div></div><div class="ch-points">150 PTS</div><div class="ch-status" id="ch4-status">🔒</div></div>
+      <div class="ch-body" id="ch4-body"><div class="challenge-desc">Analyze the APK file. Identify the Android permission that allows the app to intercept incoming SMS (OTP theft). Submit the full permission string. Format: <code>MPCCU{android.permission.XXXX_XXX}</code>.</div><div class="flag-input-area"><input class="flag-input" id="flag4-input" placeholder="MPCCU{...}"><button class="submit-btn" onclick="checkFlag(4,'MPCCU{android.permission.RECEIVE_SMS}')">SUBMIT</button></div><div class="flag-result" id="result4"></div></div></div>
+
+      <div class="challenge-card" id="ch5-card"><div class="ch-header" onclick="toggleChallenge('ch5')"><div class="ch-num diff-hard">5</div><div><div class="ch-title">EXIF Analysis</div><div class="ch-meta">175 PTS</div></div><div class="ch-points">175 PTS</div><div class="ch-status" id="ch5-status">🔒</div></div>
+      <div class="ch-body" id="ch5-body"><div class="challenge-desc">The screenshot contains EXIF metadata with three encoded parts (Base64, ROT13, hex). Decode them and combine with the closing brace to form the flag. Format: <code>MPCCU{EXIF_modifier_c2_kh}</code>.</div><div class="flag-input-area"><input class="flag-input" id="flag5-input" placeholder="MPCCU{...}"><button class="submit-btn" onclick="checkFlag(5,'MPCCU{EXIF_modifier_c2_kh}')">SUBMIT</button></div><div class="flag-result" id="result5"></div></div></div>
+
+      <div class="challenge-card" id="ch6-card"><div class="ch-header" onclick="toggleChallenge('ch6')"><div class="ch-num diff-hard">6</div><div><div class="ch-title">Master Flag</div><div class="ch-meta">175 PTS</div></div><div class="ch-points">175 PTS</div><div class="ch-status" id="ch6-status">🔒</div></div>
+      <div class="ch-body" id="ch6-body"><div class="challenge-desc">Geolocate the IP address <code>103.27.8.142</code>. Submit the country name in UPPERCASE. Format: <code>MPCCU{COUNTRY_NAME}</code>.</div><div class="flag-input-area"><input class="flag-input" id="flag6-input" placeholder="MPCCU{...}"><button class="submit-btn" onclick="checkFlag(6,'MPCCU{CAMBODIA}')">SUBMIT</button></div><div class="flag-result" id="result6"></div></div></div>
+    </div>
+
+    <!-- ========== TRAINER GUIDE (ANSWER KEY) ========== -->
+    <div id="tab-trainer" class="tab-pane">
+      <div class="section-header"><h2>Trainer's Guide</h2><span class="sub">// RESTRICTED — ANSWER KEY</span></div>
+      <div class="answer-key">
+        <div class="ak-header"><div class="ak-title">🔐 TRAINER ANSWER KEY — DO NOT SHARE</div><button class="lock-btn" onclick="toggleAnswerKey()">🔓 REVEAL</button></div>
+        <div class="ak-body" id="ak-body">
+          <div class="ak-row"><span class="ak-ch-num">1</span><span>WHOIS Registration Date</span><span class="ak-flag">MPCCU{domain_reg_20251225}</span></div>
+          <div class="ak-row"><span class="ak-ch-num">2</span><span>Base64 Decode</span><span class="ak-flag">MPCCU{CAMBODIA-OPS}</span></div>
+          <div class="ak-row"><span class="ak-ch-num">3</span><span>IFSC Code</span><span class="ak-flag">MPCCU{YESB0000001}</span></div>
+          <div class="ak-row"><span class="ak-ch-num">4</span><span>APK Permission</span><span class="ak-flag">MPCCU{android.permission.RECEIVE_SMS}</span></div>
+          <div class="ak-row"><span class="ak-ch-num">5</span><span>EXIF Combined Flag</span><span class="ak-flag">MPCCU{EXIF_modifier_c2_kh}</span></div>
+          <div class="ak-row"><span class="ak-ch-num">6</span><span>IP Country</span><span class="ak-flag">MPCCU{CAMBODIA}</span></div>
+        </div>
+      </div>
+      <div class="content-footer">MUMBAI POLICE CYBER CRIME UNIT | TRAINING DIVISION | OPERATION STOCKMIRAGE<br>THIS IS A SYNTHETIC TRAINING EXERCISE. ALL FILES ARE SAFE.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Simple Modals (only show the raw data, no hints) -->
+<div id="modal-whois" class="modal-overlay"><div class="modal"><div class="modal-header"><span>📄 WHOIS Record Summary</span><span class="modal-close" onclick="closeModal('modal-whois')">✕</span></div><div class="modal-body"><div class="whois-block">Domain: athkalivara.dpdns.org<br>Registration: 2025-12-25<br>Expiration: 2026-12-25<br>Nameservers: Cloudflare</div></div></div></div>
+<div id="modal-chat" class="modal-overlay"><div class="modal"><div class="modal-header"><span>💬 WhatsApp Extract</span><span class="modal-close" onclick="closeModal('modal-chat')">✕</span></div><div class="modal-body"><div class="whois-block">Referral code: <code>Q0FNQk9ESUEtT1BT</code><br>Sent by Priya Sharma on 5 March 2025.</div></div></div></div>
+<div id="modal-txn" class="modal-overlay"><div class="modal"><div class="modal-header"><span>🏦 Bank Statement</span><span class="modal-close" onclick="closeModal('modal-txn')">✕</span></div><div class="modal-body"><table class="tx-table"><tr><th>Date</th><th>UPI VPA</th><th>Amount</th></tr><tr><td>13 Mar 2025</td><td>profits.india2024@ybl</td><td class="tx-debit">-₹3,00,000</td></tr></table></div></div></div>
+<div id="modal-apk" class="modal-overlay"><div class="modal"><div class="modal-header"><span>📱 APK Info</span><span class="modal-close" onclick="closeModal('modal-apk')">✕</span></div><div class="modal-body"><div class="whois-block">File: tradepro_v2.1.apk<br>SHA256: 67b80660cf85d1d8b5d58456fb51b76e4cc3c5b57a56bb7bdf15b36c7ec49197</div></div></div></div>
+<div id="modal-exif" class="modal-overlay"><div class="modal"><div class="modal-header"><span>🖼️ EXIF Data</span><span class="modal-close" onclick="closeModal('modal-exif')">✕</span></div><div class="modal-body"><div class="whois-block">Artist: TVBDQ1V7RVhJRl8=<br>Copyright: zbqvrsvqre<br>UserComment: Part3: 5f63325f6b685f | Final: }</div></div></div></div>
+<div id="modal-ip" class="modal-overlay"><div class="modal"><div class="modal-header"><span>🌍 IP Address</span><span class="modal-close" onclick="closeModal('modal-ip')">✕</span></div><div class="modal-body"><div class="whois-block">IP: 103.27.8.142<br>Hosted APK and WhatsApp registration.</div></div></div></div>
+
+<script>
+  function showTab(id, el) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('tab-'+id).classList.add('active');
+    if(el) el.classList.add('active');
+  }
+  function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+  function toggleChallenge(id) { document.getElementById(id+'-body').classList.toggle('open'); }
+  function toggleAnswerKey() { document.getElementById('ak-body').classList.toggle('open'); }
+
+  let totalScore=0, flagsCaptured=0;
+  const flagSolved={1:false,2:false,3:false,4:false,5:false,6:false};
+  const flagPoints={1:100,2:100,3:150,4:150,5:175,6:175};
+  const flagAnswers={
+    1:'MPCCU{domain_reg_20251225}',
+    2:'MPCCU{CAMBODIA-OPS}',
+    3:'MPCCU{YESB0000001}',
+    4:'MPCCU{android.permission.RECEIVE_SMS}',
+    5:'MPCCU{EXIF_modifier_c2_kh}',
+    6:'MPCCU{CAMBODIA}'
+  };
+
+  function checkFlag(num, answer) {
+    const input = document.getElementById('flag'+num+'-input');
+    const result = document.getElementById('result'+num);
+    if(flagSolved[num]){ result.textContent='Already captured!'; result.className='flag-result show success'; return; }
+    if(input.value.trim().toLowerCase() === answer.toLowerCase()){
+      flagSolved[num]=true;
+      totalScore += flagPoints[num];
+      flagsCaptured++;
+      document.getElementById('score-num').textContent = totalScore;
+      document.getElementById('flags-num').textContent = flagsCaptured;
+      document.getElementById('remain-num').textContent = 6-flagsCaptured;
+      document.getElementById('score-bar').style.width = (totalScore/600*100)+'%';
+      document.getElementById('flags-bar').style.width = (flagsCaptured/6*100)+'%';
+      document.getElementById('sidebar-score').textContent = totalScore+' / 600';
+      document.getElementById('flag-counter').textContent = flagsCaptured+'/6';
+      document.getElementById('ch'+num+'-status').textContent = '✅';
+      document.getElementById('ch'+num+'-card').classList.add('solved');
+      result.textContent = '🚩 FLAG CAPTURED! +'+flagPoints[num]+' points.';
+      result.className = 'flag-result show success';
+      if(flagsCaptured===6) document.getElementById('flag-counter').className='status-chip chip-green';
+    } else {
+      input.classList.add('wrong');
+      result.textContent = '✗ Incorrect. Review the evidence.';
+      result.className = 'flag-result show fail';
+      setTimeout(()=>input.classList.remove('wrong'),600);
+    }
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+    overlay.addEventListener('click',e=>{ if(e.target===overlay) closeModal(overlay.id); });
+  });
+
+  function translatePage(lang){
+    document.querySelectorAll('.lang-btn').forEach(btn=>btn.classList.remove('active'));
+    document.querySelector(`.lang-btn[data-lang="${lang}"]`).classList.add('active');
+  }
+  document.querySelectorAll('.lang-btn').forEach(btn=>btn.addEventListener('click',()=>translatePage(btn.dataset.lang)));
+</script>
+</body>
+</html>
